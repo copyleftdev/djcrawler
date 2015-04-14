@@ -1,4 +1,5 @@
 import scrapy
+from djcrawler.items import DjcrawlerItem
 
 
 class DmozSpider(scrapy.Spider):
@@ -10,6 +11,9 @@ class DmozSpider(scrapy.Spider):
   ]
 
   def parse(self, response):
-    filename = response.url.split("/")[-2]
-    with open(filename, 'wb') as f:
-      f.write(response.body)
+    for sel in response.xpath('//ul/li'):
+      item = DjcrawlerItem()
+      item['title'] = sel.xpath('a/text()').extract()
+      item['link'] = sel.xpath('a/@href').extract()
+      item['desc'] = sel.xpath('text()').extract()
+      yield item
